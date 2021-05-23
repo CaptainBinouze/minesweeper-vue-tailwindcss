@@ -5,6 +5,11 @@
     <div class="w-full mt-7 h-16 flex flex-row justify-between items-center">
       <h1 class="text-2xl text-gray-800 font-semibold leading-tight">Minesweeper</h1>
       <div class="flex flex-row">
+        <div v-if="(started == true) && !isMobile() && flagsSet == 0"
+          :class="['text-sm group flex justify-center items-center p-3 my-auto sm:p-4 rounded-xl mx-2 bg-white shadow-md']"
+        >
+        <p><span class="font-bold">TIPS </span> Use right click to put a flag</p>
+        </div>
         <div
           v-if="started == true"
           @click="started = false"
