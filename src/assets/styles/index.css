@@ -1,0 +1,26 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+.nobomb {
+    background-color: #ffffff;
+}
+
+.has-1-bombs-around {
+    color: rgba(59, 130, 246)
+}
+.has-2-bombs-around {
+    color: rgba(239, 68, 68);
+}
+.has-3-bombs-around {
+    color: rgba(5, 150, 105);
+}
+.has-4-bombs-around {
+    color: rgba(245, 158, 11);
+}
+.has-5-bombs-around {
+    background-color: rgba(180, 83, 9);
+}
+.has-6-bombs-around {
+    background-color: rgba(180, 83, 9);
+}
