@@ -350,7 +350,6 @@ export default {
           ? idFirstClick + size + 1
           : -1,
       ];
-      console.log(excludedCell);
       // Placing bombs
       const nbCells = cells.length;
 
