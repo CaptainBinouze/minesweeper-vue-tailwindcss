@@ -19,8 +19,14 @@
     color: rgba(245, 158, 11);
 }
 .has-5-bombs-around {
-    background-color: rgba(180, 83, 9);
+    color: rgba(79, 70, 229);
 }
 .has-6-bombs-around {
-    background-color: rgba(180, 83, 9);
+    color: rgba(120, 53, 15);
+}
+.has-7-bombs-around {
+    color: rgba(124, 58, 237);
+}
+.has-8-bombs-around {
+    color: rgba(31, 41, 55);
 }

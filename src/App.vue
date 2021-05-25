@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="bg-gray-100">
+  <div id="app" class="bg-gray-100 dark:bg-gray-800">
     <Minesweeper/>
   </div>
 </template>

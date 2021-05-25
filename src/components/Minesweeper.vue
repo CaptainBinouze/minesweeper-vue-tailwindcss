@@ -3,7 +3,7 @@
     class="container h-screen mx-auto p-4 flex flex-col justify-start items-center"
   >
     <div class="w-full mt-7 h-16 flex flex-row justify-between items-center">
-      <h1 class="text-2xl text-gray-800 font-semibold leading-tight">Minesweeper</h1>
+      <h1 class="text-2xl text-gray-800 font-semibold leading-tight dark:text-gray-100">Minesweeper</h1>
       <div class="flex flex-row">
         <div v-if="(started == true) && !isMobile() && flagsSet == 0"
           :class="['text-sm group flex justify-center items-center p-3 my-auto sm:p-4 rounded-xl mx-2 bg-white shadow-md']"
@@ -29,12 +29,28 @@
             class="text-gray-800 group-hover:text-gray-500"
           />
         </div>
+        <div
+          @click="toggleDarkMode"
+          :title="theme == 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+          :class="['group flex justify-center items-center p-3 my-auto sm:p-5 rounded-xl mx-2 bg-white shadow-md cursor-pointer']"
+        >
+          <font-awesome-icon
+            v-if="theme == 'light'"
+            icon="moon"
+            class="text-gray-800 group-hover:text-gray-500"
+          />
+          <font-awesome-icon
+            v-if="theme == 'dark'"
+            icon="sun"
+            class="text-gray-800 group-hover:text-gray-500"
+          />
+        </div>
       </div>
     </div>
     <!--<div v-if="isMobile()">mobile</div>-->
     <div class="h-full flex flex-col justify-center items-center">
       <div v-if="!started" class="flex flex-col">
-        <label class="mb-1 text-md text-grey-darkest" for="size">Size</label>
+        <label class="mb-1 text-md text-grey-darkest dark:text-gray-100" for="size">Size</label>
         <input
           id="size"
           v-model="size"
@@ -44,10 +60,11 @@
           class="border rounded-xl p-4 mb-5 text-grey-darkest"
           size="3"
         />
-        <label class="mb-1 text-md text-grey-darkest" for="bombs">Mines</label>
+        <label class="mb-1 text-md text-grey-darkest dark:text-gray-100" for="bombs">Mines</label>
         <input
           id="bombs"
           v-model="bombs"
+          @change="bombHandler"
           type="number"
           name="bombs"
           class="border rounded-xl p-4 mb-5 text-grey-darkest"
@@ -178,8 +195,20 @@ export default {
       timeInterval: null,
       mobileAction: 1,
       screenWidth: window.innerWidth,
-      screenHeight: window.innerHeight
+      screenHeight: window.innerHeight,
+      theme: null
     };
+  },
+  beforeMount(){
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.querySelector("html").classList.add('dark')
+      localStorage.theme = 'dark'
+      this.theme = 'dark'
+    } else {
+      document.querySelector("html").classList.remove('dark')
+      localStorage.theme = 'light'
+      this.theme = 'light'
+    }
   },
   created() {
     window.addEventListener("resize", this.screenResize);
@@ -237,6 +266,17 @@ export default {
     },
   },
   methods: {
+    toggleDarkMode() {
+      if (localStorage.theme === 'light') {
+        document.querySelector("html").classList.add('dark')
+        localStorage.theme = 'dark'
+        this.theme = 'dark'
+      } else {
+        document.querySelector("html").classList.remove('dark')
+        localStorage.theme = 'light'
+        this.theme = 'light'
+      }
+    },
     timer() {
       this.timeInterval = setInterval(() => {
         this.timePassed = this.timePassed + 1
@@ -260,7 +300,12 @@ export default {
           this.size = Math.trunc((this.screenHeight - 165)/36)
         }
       }
-
+      this.bombHandler()
+    },
+    bombHandler(){
+      let maxBomb = (this.size*this.size) - 9
+      if(this.bombs < 5) { this.bombs = 5 }
+      if(this.bombs > maxBomb) { this.bombs = maxBomb}
     },
     initGrid() {
       clearInterval(this.timeInterval);
@@ -337,38 +382,37 @@ export default {
       }
       let idFirstClick = firstCell.y * size + firstCell.x;
       const excludedCell = [
-        idFirstClick > size - 1 && idFirstClick % 10 > 0
+        idFirstClick > size - 1 && idFirstClick % size > 0
           ? idFirstClick - size - 1
           : -1,
         idFirstClick > size - 1 ? idFirstClick - size : -1,
-        idFirstClick > size - 1 && idFirstClick % 10 < 9
+        idFirstClick > size - 1 && idFirstClick % size < (size-1)
           ? idFirstClick - size + 1
           : -1,
-        idFirstClick % 10 > 0 ? idFirstClick - 1 : -1,
+        idFirstClick % size > 0 ? idFirstClick - 1 : -1,
         idFirstClick,
-        idFirstClick % 10 < 9 ? idFirstClick + 1 : -1,
-        idFirstClick < size * (size - 1) && idFirstClick % 10 > 0
+        idFirstClick % size < (size-1) ? idFirstClick + 1 : -1,
+        idFirstClick < size * (size - 1) && idFirstClick % size > 0
           ? idFirstClick + size - 1
           : -1,
         idFirstClick < size * (size - 1) ? idFirstClick + size : -1,
-        idFirstClick < size * (size - 1) && idFirstClick % 10 < 9
+        idFirstClick < size * (size - 1) && idFirstClick % size < (size-1)
           ? idFirstClick + size + 1
           : -1,
       ];
+
       // Placing bombs
       const nbCells = cells.length;
-
       for (let i = 0; i < bombs; i++) {
-        let random = Math.floor(Math.random() * nbCells);
-        while (excludedCell.includes(random)) {
-          random = Math.floor(Math.random() * nbCells);
-        }
-        const selectedCell = cells[random];
+
+        var selectedCell = cells[this.getRandomCellNumber(nbCells, excludedCell)];
         let alreadyBomb = selectedCell.bomb;
+
         while (alreadyBomb === true) {
-          const selectedCell = cells[Math.floor(Math.random() * nbCells)];
+          selectedCell = cells[this.getRandomCellNumber(nbCells, excludedCell)];
           alreadyBomb = selectedCell.bomb;
         }
+
         selectedCell.bomb = true;
       }
       // Grid creation
@@ -420,6 +464,18 @@ export default {
       this.flags = bombs;
       this.grid = grid;
       this.trigger(grid[firstCell.y][firstCell.x]);
+    },
+    /**
+     * 
+     */
+    getRandomCellNumber(length, excludedCell) {
+      let random = Math.floor(Math.random() * length);
+
+      while (excludedCell.includes(random)) {
+        random = Math.floor(Math.random() * length);
+      }
+
+      return random
     },
     /**
      * Triggered on a simple click
